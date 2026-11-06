@@ -8,8 +8,8 @@
   --serif: "Songti SC", "STSong", "Noto Serif SC", serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { background: var(--black); }
-body { font: 400 13px/1.45 var(--sans); color: var(--ink); max-width: 430px; margin: 0 auto; min-height: 100vh; background: var(--black); -webkit-font-smoothing: antialiased; }
+html { background: linear-gradient(var(--white) 50%, var(--black) 50%); }
+body { font: 400 13px/1.45 var(--sans); color: var(--ink); max-width: 430px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: var(--black); -webkit-font-smoothing: antialiased; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 svg { display: block; }
 
@@ -47,7 +47,7 @@ h1 { font-size: 34px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1
 
 /* ---------- 下半：黑 ---------- */
 .night {
-  position: relative; z-index: 1;
+  position: relative; z-index: 1; flex: 1;
   background: var(--black); color: #fff;
   margin-top: -36px; padding: 58px 22px calc(100px + env(safe-area-inset-bottom));
   border-radius: 36px 0 0 0;
