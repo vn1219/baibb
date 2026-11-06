@@ -43,7 +43,7 @@
     background: var(--bg);
     color: var(--ink);
     transition: background .4s, color .4s;
-    padding: 28px 18px 120px;
+    padding: max(28px, env(safe-area-inset-top)) 18px 120px;
   }
   /* 细噪点，模拟参考图里的颗粒质感 */
   body::before {
