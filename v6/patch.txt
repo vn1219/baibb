@@ -1,0 +1,5 @@
+
+/* 11.06 v6：Claude Code 云端窗口做的黑白拟态主页样板，public/v6 下文件只读开放，跟 v5 并存，不碰后端。 */
+(function walk6(rel) { const fs = require('fs'), p = require('path'); let L = []; try { L = fs.readdirSync(p.join(__dirname, '..', 'public', rel), { withFileTypes: true }); } catch { return; }
+  for (const d of L) { const r = rel + '/' + d.name; if (d.isDirectory()) walk6(r); else { const t = V5_TYPES[d.name.split('.').pop()]; if (t) STATIC[r] = [r, t]; } } })('v6');
+STATIC['v6/'] = ['v6/index.html', V5_TYPES.html];
