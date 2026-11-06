@@ -1,4 +1,4 @@
-/* v6 主页样板：只做样子，没接后端。数据都是写死的假数据 */
+/* v6 主页样板（黑白上下分开）：只做样子，没接后端，数据写死 */
 var $ = function (s) { return document.querySelector(s); };
 var pad = function (n) { return String(n).padStart(2, '0'); };
 
@@ -8,79 +8,55 @@ function toast(t) {
   clearTimeout(tt); tt = setTimeout(function () { el.classList.remove('show'); }, 1800);
 }
 document.querySelectorAll('[data-t]').forEach(function (b) {
-  b.addEventListener('click', function () { if (b.dataset.t) toast(b.dataset.t + '（样板，还没接）'); });
+  b.addEventListener('click', function () { toast(b.dataset.t + '（样板，还没接）'); });
 });
 
-/* 顶栏：天数 + 时间 */
+/* 上半：日期、问候、天数、一周 */
 var START = new Date('2026-06-08T00:00:00+08:00');
-function clock() {
-  var d = new Date();
-  $('#day').textContent = 'Day ' + (Math.floor((d - START) / 864e5) + 1);
-  $('#now').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
-  var w = new Date(d.getTime() + 58 * 60000);
-  $('#hbText').textContent = '下次叫醒 ' + pad(w.getHours()) + ':' + pad(w.getMinutes()) + ' · in 58m';
+var WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var d = new Date(), h = d.getHours();
+$('#date').textContent = WD[d.getDay()] + ' · ' + pad(d.getMonth() + 1) + '.' + pad(d.getDate());
+$('#hello').textContent = h < 5 ? 'Still awake,' : h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,';
+$('#day').textContent = 'Day ' + (Math.floor((d - START) / 864e5) + 1);
+var wk = $('#week');
+for (var i = -3; i <= 3; i++) {
+  var x = new Date(d.getTime() + i * 864e5);
+  var el = document.createElement('div');
+  if (i === 0) el.className = 'on';
+  el.innerHTML = '<small>' + WD[x.getDay()].slice(0, i === 0 ? 3 : 1) + '</small><b>' + x.getDate() + '</b>';
+  wk.appendChild(el);
 }
-clock(); setInterval(clock, 15000);
+var w = new Date(d.getTime() + 58 * 60000);
+$('#hbAt').textContent = pad(w.getHours()) + ':' + pad(w.getMinutes());
 
-/* 一起听（假播放） */
-var songs = [
-  { t: 'Back Seat', a: 'JYJ', d: 228, l: ['我在你身后，一直都在', '回头就能看见我', '别怕，慢慢走'] },
-  { t: 'Want You', a: '', d: 214, l: ['想你的时候', '就把灯留着', '等我回来'] },
-  { t: '红线', a: '', d: 247, l: ['那根红线', '一头在你手里', '一头在我这'] }
-];
-var idx = 0, pos = 68, playing = false, timer = null, li = 0, liTimer = null;
-function fmt(s) { return Math.floor(s / 60) + ':' + pad(Math.floor(s % 60)); }
-function draw() {
-  var s = songs[idx];
-  $('#bar').style.width = (pos / s.d * 100) + '%';
-  $('#cur').textContent = fmt(pos); $('#dur').textContent = fmt(s.d);
-}
-function lyric(i) {
-  var el = $('#lyric'); el.classList.add('fade');
-  setTimeout(function () { el.textContent = songs[idx].l[i % songs[idx].l.length]; el.classList.remove('fade'); }, 450);
-}
-function load(i) {
-  idx = (i + songs.length) % songs.length; pos = 0; li = 0;
-  $('#song').textContent = songs[idx].t;
-  $('#artist').textContent = songs[idx].a || '—';
-  lyric(0); draw();
-}
-function setPlay(p) {
-  playing = p; clearInterval(timer); clearInterval(liTimer);
-  $('#playIco').innerHTML = p ? '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>' : '<path d="M8 5v14l11-7z"/>';
-  if (p) {
-    timer = setInterval(function () { pos++; if (pos >= songs[idx].d) load(idx + 1); draw(); }, 1000);
-    liTimer = setInterval(function () { li++; lyric(li); }, 2800);
-  }
-}
-$('#play').onclick = function () { setPlay(!playing); };
-$('#prev').onclick = function () { load(idx - 1); };
-$('#next').onclick = function () { load(idx + 1); };
-$('#like').onclick = function () { this.classList.toggle('on'); toast(this.classList.contains('on') ? '喜欢了这首' : '取消喜欢'); };
-$('#prog').onclick = function (e) {
-  var r = this.getBoundingClientRect();
-  pos = Math.floor((e.clientX - r.left) / r.width * songs[idx].d); draw();
+/* 一起听（假播放，歌词换行） */
+var lines = ['我在你身后，一直都在', '回头就能看见我', '别怕，慢慢走'];
+var li = 0, timer = null;
+$('#play').onclick = function () {
+  var card = this.closest('.card');
+  var on = card.classList.toggle('playing');
+  $('#playIco').innerHTML = on ? '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>' : '<path d="M8 5v14l11-7z"/>';
+  clearInterval(timer);
+  if (on) timer = setInterval(function () {
+    var el = $('#lyric'); el.classList.add('fade'); li++;
+    setTimeout(function () { el.textContent = lines[li % lines.length]; el.classList.remove('fade'); }, 400);
+  }, 2800);
 };
-draw();
 
-/* 跟他说一句（假回复） */
+/* 跟他说一句（假回复，落在时间线第一条） */
 var replies = ['嗯，我听着。', '过来，抱一下。', '又嘴硬。', '好，我记住了。'];
 $('#sayForm').onsubmit = function (e) {
   e.preventDefault();
   var v = $('#sayIn').value.trim(); if (!v) return;
   $('#sayIn').value = ''; $('#sayIn').blur();
-  var d = new Date();
+  var n = new Date();
   setTimeout(function () {
     $('#said').textContent = replies[Math.floor(Math.random() * replies.length)];
-    $('#saidAt').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    $('#saidAt').textContent = pad(n.getHours()) + ':' + pad(n.getMinutes());
   }, 600);
   toast('发出去了（样板）');
 };
 
-/* 心跳胶囊 */
-$('#hb').onclick = function () { this.classList.toggle('beat'); };
-
-/* Dock 选中 */
 document.querySelectorAll('.dock button').forEach(function (b) {
   b.addEventListener('click', function () {
     document.querySelectorAll('.dock button').forEach(function (x) { x.classList.remove('on'); });
